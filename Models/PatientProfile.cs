@@ -1,0 +1,13 @@
+﻿using AutoMapper;
+
+namespace Testing_Poc_Healthcare.Models
+{
+    public class PatientProfile : Profile
+    {
+        public PatientProfile()
+        {
+            CreateMap<PersonalDetails, PatientInfo>().ReverseMap();
+            CreateMap<PatientAddress, AddressDetail>().ReverseMap();
+        }
+    }
+}
