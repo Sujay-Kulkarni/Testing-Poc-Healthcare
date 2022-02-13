@@ -33,6 +33,8 @@ namespace Testing_Poc_Healthcare.Models
 
     public class PersonalDetails
     {
+        [DefaultValue(0)]
+        public int PatientID { get; set; }
         [Required]
         public string FirstName { get; set; }
         public string MiddleName { get; set; }

@@ -8,9 +8,10 @@ namespace Testing_Poc_Healthcare.Interface
 {
     public interface IPatientService
     {
-        bool CreatePatient(PatientInfo patientInfo);
+        bool CreatePatient(PatientDetail patientDetail);
+        bool CreatePatientAddress(int patientId, PatientAddress address);
         void EditPatient();
         void DeletePatient();
-        void FindPatient();
+        List<PersonalDetails> FindPatient(PatientSearch patientSearch);
     }
 }

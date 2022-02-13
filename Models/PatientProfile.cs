@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System.Collections.Generic;
 
 namespace Testing_Poc_Healthcare.Models
 {
@@ -8,6 +9,7 @@ namespace Testing_Poc_Healthcare.Models
         {
             CreateMap<PersonalDetails, PatientInfo>().ReverseMap();
             CreateMap<PatientAddress, AddressDetail>().ReverseMap();
+            //CreateMap<List<PersonalDetails>, List<PatientInfo>>().ReverseMap();
         }
     }
 }

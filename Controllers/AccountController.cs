@@ -15,11 +15,11 @@ namespace Testing_Poc_Healthcare.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly HealthCareDBContext _DBContext;
+        //private readonly HealthCareDBContext _DBContext;
         private readonly IUserService _userService;
-        public AccountController(HealthCareDBContext healthCareDBContext, IUserService userService)
+        public AccountController(IUserService userService)
         {
-            _DBContext = healthCareDBContext;
+           // _DBContext = healthCareDBContext;
             _userService = userService;
         }
 

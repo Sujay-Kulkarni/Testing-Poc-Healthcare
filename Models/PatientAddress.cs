@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Testing_Poc_Healthcare.Models
 {
@@ -17,7 +18,9 @@ namespace Testing_Poc_Healthcare.Models
         public string City { get; set; }
         [Required]
         public string ZipCode { get; set; }
-        public PatientInfo PatientID { get; set; }
+        public int PatientId { get; set; }
+        [ForeignKey("PatientId")]
+        public virtual PatientInfo PatientInfo { get; set; }
     }
     public class AddressDetail
     {

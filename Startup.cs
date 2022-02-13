@@ -39,6 +39,7 @@ namespace Testing_Poc_Healthcare
             services.AddControllers();
             services.AddSwaggerGen();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPatientService, PatientService>();
             services.AddAutoMapper(typeof(PatientProfile));
         }
 
