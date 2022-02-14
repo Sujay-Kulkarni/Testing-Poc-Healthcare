@@ -29,7 +29,6 @@ namespace Testing_Poc_Healthcare.Models
         [DefaultValue(true)]
         public bool IsActive { get; set; }
         public DateTime? LastLogin { get; set; }
-        public ICollection<Role> Roles { get; set; }
     }
 
     [NotMapped]

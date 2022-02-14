@@ -16,6 +16,25 @@ namespace Testing_Poc_Healthcare.Services
             _dbContext = healthCareDbContext;
         }
 
+        public bool AddRole(Role role)
+        {
+            try {
+                var isRoleExists = _dbContext.Roles.Where(r => r.RoleName.ToLower() == 
+                role.RoleName.ToLower()).Count() > 0;
+                if (!isRoleExists)
+                {
+                    role.IsActive = true;
+                    _dbContext.Roles.Add(role);
+                    return _dbContext.SaveChanges() > 0;
+                }
+
+                return false;
+
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+
         public bool AddUserDetails(UserInfo user)
         {
             var existingRecord = _dbContext.UserInfos.Where(e => e.FirstName == user.FirstName
@@ -26,7 +45,9 @@ namespace Testing_Poc_Healthcare.Services
                 user.CreatDate = DateTime.Now;
                 user.CreatedBy = "Admin";
                 _dbContext.UserInfos.Add(user);
-                return _dbContext.SaveChanges() > 0;
+                _dbContext.SaveChanges();
+
+                return  AssignUserRole(user.UserId, 1);
             }
 
             return false;
@@ -45,7 +66,7 @@ namespace Testing_Poc_Healthcare.Services
                     LastName = userDetails.LastName,
                     Gender =  (userDetails.Gender)  ? "Male" : "Female",
                     LastLogin = userDetails.LastLogin,
-                    RoleName = (userDetails.Roles != null) ? userDetails.Roles.FirstOrDefault().RoleName : string.Empty,
+                    RoleName = "0",
                     UserId = userDetails.UserId
                 };
             } else { return null; }
@@ -55,5 +76,22 @@ namespace Testing_Poc_Healthcare.Services
         //{ 
         //    var 
         //}
+
+        private bool AssignUserRole(int userId, int roleId)
+        {
+            try
+            {
+                if (userId > 0 && roleId > 0)
+                {
+                    _dbContext.UserRoles.Add(new UserRoles { UserId = userId, RoleId = roleId });
+                    return _dbContext.SaveChanges() > 0;
+                }
+
+                return false;
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+        }
     }
 }

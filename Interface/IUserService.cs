@@ -6,5 +6,6 @@ namespace Testing_Poc_Healthcare.Interface
     {
         UserInfoVM GetUserDetails(UserLogin userLogin);
         bool AddUserDetails(UserInfo userInfo);
+        bool AddRole(Role role);
     }
 }
