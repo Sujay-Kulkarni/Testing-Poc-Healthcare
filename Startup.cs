@@ -30,26 +30,39 @@ namespace Testing_Poc_Healthcare
         }
 
         public IConfiguration Configuration { get; }
+        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        // Work-around since AllowAnyOrigin returns a header that isn't allowed in .NET Core 2.2
+                        builder.SetIsOriginAllowed(_ => true);
+                        builder.AllowAnyHeader();
+                        builder.AllowAnyMethod();
+                        builder.AllowCredentials();
+                        builder.WithExposedHeaders("Content-Disposition");
+                    }
+                );
+
+            });
+            services.AddControllers();
             services.AddDbContext<HealthCareDBContext>(item =>
             {
                 const string Name = "DefaultConnection";
                 string strConnection = Configuration.GetConnectionString(Name);
                 object p = item.UseMySql(strConnection, ServerVersion.AutoDetect(strConnection));
             });
-            services.AddControllers();
             services.AddSwaggerGen();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPatientService, PatientService>();
             services.AddAutoMapper(typeof(PatientProfile));
 
-            services.AddCors(c =>
-            {
-                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin());
-            });
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -59,11 +72,12 @@ namespace Testing_Poc_Healthcare
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Issuer"],
-                    ValidAudience = Configuration["Jwt:Audience"],
+                    //ValidIssuer = Configuration["Jwt:Issuer"],
+                    //ValidAudience = Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                 };
             });
+
 
         }
 
@@ -78,7 +92,9 @@ namespace Testing_Poc_Healthcare
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors();
 
+            //app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
