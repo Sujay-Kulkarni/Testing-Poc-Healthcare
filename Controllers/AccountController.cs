@@ -53,8 +53,7 @@ namespace Testing_Poc_Healthcare.Controllers
                 return BadRequest("Incorrect User name or Password");
             }
         }
-
-        [Authorize]
+        
         [HttpPost("AddUser")]
         public ActionResult AddUser(UserInfo user)
         {
@@ -66,6 +65,22 @@ namespace Testing_Poc_Healthcare.Controllers
             }
 
             return NotFound("User already exists");
+        }
+
+        [HttpPost("AddRole")]
+        public ActionResult AddRole(Role role)
+        {
+            if (role.RoleId > 0)
+            {
+                role.RoleId = 0;
+            }
+            var response = _userService.AddRole(role);
+            if (response)
+            {
+              return Ok("Role added successfully");
+            }
+
+            return BadRequest("Role already exists");
         }
     }
 }

@@ -6,6 +6,7 @@ namespace Testing_Poc_Healthcare.Interface
     {
         UserInfoVM GetUserDetails(UserLogin userLogin, JwtInfo jwtInfo);
         bool AddUserDetails(UserInfo userInfo);
+        bool AddRole(Role role);
         string GenerateToken(UserInfoVM userDetails, JwtInfo jwtInfo);
     }
 }

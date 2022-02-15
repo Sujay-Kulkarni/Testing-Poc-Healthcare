@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Testing_Poc_Healthcare.DBContexts;
 
 namespace Testing_Poc_Healthcare.Migrations
 {
     [DbContext(typeof(HealthCareDBContext))]
-    partial class HealthCareDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220214120717_UserRoleTable")]
+    partial class UserRoleTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,27 +176,6 @@ namespace Testing_Poc_Healthcare.Migrations
                     b.ToTable("UserInfos");
                 });
 
-            modelBuilder.Entity("Testing_Poc_Healthcare.Models.UserRoles", b =>
-                {
-                    b.Property<int>("UserRoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserRoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserRoles");
-                });
-
             modelBuilder.Entity("Testing_Poc_Healthcare.Models.PatientAddress", b =>
                 {
                     b.HasOne("Testing_Poc_Healthcare.Models.PatientInfo", "PatientInfo")
@@ -204,25 +185,6 @@ namespace Testing_Poc_Healthcare.Migrations
                         .IsRequired();
 
                     b.Navigation("PatientInfo");
-                });
-
-            modelBuilder.Entity("Testing_Poc_Healthcare.Models.UserRoles", b =>
-                {
-                    b.HasOne("Testing_Poc_Healthcare.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Testing_Poc_Healthcare.Models.UserInfo", "UserInfo")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("UserInfo");
                 });
 #pragma warning restore 612, 618
         }

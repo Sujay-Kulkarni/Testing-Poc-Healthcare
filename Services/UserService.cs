@@ -22,6 +22,25 @@ namespace Testing_Poc_Healthcare.Services
             _dbContext = healthCareDbContext;
         }
 
+        public bool AddRole(Role role)
+        {
+            try {
+                var isRoleExists = _dbContext.Roles.Where(r => r.RoleName.ToLower() == 
+                role.RoleName.ToLower()).Count() > 0;
+                if (!isRoleExists)
+                {
+                    role.IsActive = true;
+                    _dbContext.Roles.Add(role);
+                    return _dbContext.SaveChanges() > 0;
+                }
+
+                return false;
+
+            } catch (Exception ex) {
+                throw ex;
+            }
+        }
+
         public bool AddUserDetails(UserInfo user)
         {
             var existingRecord = _dbContext.UserInfos.Where(e => e.FirstName == user.FirstName
@@ -32,7 +51,9 @@ namespace Testing_Poc_Healthcare.Services
                 user.CreatDate = DateTime.Now;
                 user.CreatedBy = "Admin";
                 _dbContext.UserInfos.Add(user);
-                return _dbContext.SaveChanges() > 0;
+                _dbContext.SaveChanges();
+
+                return  AssignUserRole(user.UserId, 1);
             }
 
             return false;
@@ -51,17 +72,20 @@ namespace Testing_Poc_Healthcare.Services
                         LastName = userDetails.LastName,
                         Gender = (userDetails.Gender) ? "Male" : "Female",
                         LastLogin = userDetails.LastLogin,
-                        RoleName = (userDetails.Roles != null) ? userDetails.Roles.FirstOrDefault().RoleName : string.Empty,UserId = userDetails.UserId}), jwtInfo) ;
+                        UserId = userDetails.UserId}), 
+                        jwtInfo) ;
 
                 return new UserInfoVM
                 {
                     EmailId = userDetails.EmailId,
                     FirstName = userDetails.FirstName,
                     LastName = userDetails.LastName,
-                    Gender =  (userDetails.Gender)  ? "Male" : "Female",
+                    Gender = (userDetails.Gender) ? "Male" : "Female",
                     LastLogin = userDetails.LastLogin,
-                    RoleName = (userDetails.Roles != null) ? userDetails.Roles.FirstOrDefault().RoleName : string.Empty,
-                    UserId = userDetails.UserId
+                    RoleName = "0",
+                    UserId = userDetails.UserId,
+                    Token = tokenkey
+
                 };
             } else { return null; }
         }
@@ -75,8 +99,8 @@ namespace Testing_Poc_Healthcare.Services
                 new Claim(ClaimTypes.NameIdentifier, userDetails.EmailId),
                 new Claim(ClaimTypes.Email, userDetails.EmailId),
                 new Claim(ClaimTypes.GivenName, userDetails.FirstName),
-                new Claim(ClaimTypes.Surname, userDetails.LastName),
-                new Claim(ClaimTypes.Role, userDetails.RoleName)
+                new Claim(ClaimTypes.Surname, userDetails.LastName)
+               // new Claim(ClaimTypes.Role, userDetails.RoleName)
             };
 
             var token = new JwtSecurityToken(jwtInfo.Issuer,
@@ -87,10 +111,27 @@ namespace Testing_Poc_Healthcare.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        
+        //private int UpdateLastLogi(UserInfo userInfo)
+        //{ 
+        //    var 
+        //}
 
-            //private int UpdateLastLogi(UserInfo userInfo)
-            //{ 
-            //    var 
-            //}
+        private bool AssignUserRole(int userId, int roleId)
+        {
+            try
+            {
+                if (userId > 0 && roleId > 0)
+                {
+                    _dbContext.UserRoles.Add(new UserRoles { UserId = userId, RoleId = roleId });
+                    return _dbContext.SaveChanges() > 0;
+                }
+
+                return false;
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
         }
+    }
 }

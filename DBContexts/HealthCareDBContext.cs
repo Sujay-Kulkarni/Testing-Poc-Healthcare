@@ -11,7 +11,7 @@ namespace Testing_Poc_Healthcare.DBContexts
     {
         public DbSet<UserInfo> UserInfos { get; set; }
         public DbSet<Role> Roles { get; set; }
-        //public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserRoles> UserRoles { get; set; }
         public DbSet<PatientInfo> PatientInfos { get; set; }
         public DbSet<PatientAddress> PatientAddresses { get; set; }
 
