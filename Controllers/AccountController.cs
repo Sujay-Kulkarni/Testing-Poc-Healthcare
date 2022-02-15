@@ -8,25 +8,43 @@ using System.Threading.Tasks;
 using Testing_Poc_Healthcare.DBContexts;
 using Testing_Poc_Healthcare.Interface;
 using Testing_Poc_Healthcare.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace Testing_Poc_Healthcare.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]")]   
     [ApiController]
     public class AccountController : ControllerBase
     {
         //private readonly HealthCareDBContext _DBContext;
         private readonly IUserService _userService;
-        public AccountController(IUserService userService)
+        private IConfiguration _configuration;
+        public string jwtkey = "";
+        public string issuer ="";
+        public string Audience = "";
+
+        public AccountController(IUserService userService,IConfiguration configuration)
         {
            // _DBContext = healthCareDBContext;
             _userService = userService;
-        }
+            _configuration = configuration;
 
-        [HttpPost("Login")]
-        public ActionResult Login(UserLogin userLogin)
+            jwtkey = configuration.GetSection("Jwt").GetSection("Key").Value;
+            issuer = configuration.GetSection("Jwt").GetSection("Issuer").Value;
+            Audience = configuration.GetSection("Jwt").GetSection("Audience").Value;
+
+    }
+
+        [AllowAnonymous]
+        [HttpPost("Login")]        
+        public ActionResult Login([FromBody] UserLogin userLogin)
         {
-            var response = _userService.GetUserDetails(userLogin);
+            JwtInfo jwtInfo = new JwtInfo();
+            jwtInfo.Jwtkey = jwtkey;
+            jwtInfo.Issuer = issuer;
+            jwtInfo.Audience = Audience;
+
+            var response = _userService.GetUserDetails(userLogin, jwtInfo);
             if(response != null)
             {
                 return Ok(response);
