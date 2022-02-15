@@ -65,11 +65,10 @@ namespace Testing_Poc_Healthcare
                 };
             });
 
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory logger)
         {
             if (env.IsDevelopment())
             {
@@ -94,6 +93,9 @@ namespace Testing_Poc_Healthcare
 
             app.UseCors(options => options.AllowAnyOrigin());
             app.UseAuthentication();
+            var loggingOptions = this.Configuration.GetSection("Log4NetCore")
+                                               .Get<Log4NetProviderOptions>();
+            logger.AddLog4Net();
         }
     }
 }

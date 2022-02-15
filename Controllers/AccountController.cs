@@ -9,6 +9,9 @@ using Testing_Poc_Healthcare.DBContexts;
 using Testing_Poc_Healthcare.Interface;
 using Testing_Poc_Healthcare.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using log4net;
+using Newtonsoft.Json;
 
 namespace Testing_Poc_Healthcare.Controllers
 {
@@ -21,17 +24,18 @@ namespace Testing_Poc_Healthcare.Controllers
         private IConfiguration _configuration;
         public string jwtkey = "";
         public string issuer ="";
-        public string Audience = "";
+        public string audience = "";
+        private readonly ILog logger;
 
         public AccountController(IUserService userService,IConfiguration configuration)
         {
-           // _DBContext = healthCareDBContext;
             _userService = userService;
             _configuration = configuration;
 
             jwtkey = configuration.GetSection("Jwt").GetSection("Key").Value;
             issuer = configuration.GetSection("Jwt").GetSection("Issuer").Value;
-            Audience = configuration.GetSection("Jwt").GetSection("Audience").Value;
+            audience = configuration.GetSection("Jwt").GetSection("Audience").Value;
+            logger = LogManager.GetLogger(typeof(AccountController));
 
     }
 
@@ -39,48 +43,87 @@ namespace Testing_Poc_Healthcare.Controllers
         [HttpPost("Login")]        
         public ActionResult Login([FromBody] UserLogin userLogin)
         {
-            JwtInfo jwtInfo = new JwtInfo();
-            jwtInfo.Jwtkey = jwtkey;
-            jwtInfo.Issuer = issuer;
-            jwtInfo.Audience = Audience;
+            logger.Info("Login method called");
+            //logger.Info(JsonConvert.SerializeObject(userLogin));
 
-            var response = _userService.GetUserDetails(userLogin, jwtInfo);
-            if(response != null)
+            JwtInfo jwtInfo = new JwtInfo();
+            try
             {
-                return Ok(response);
-            } else
+                jwtInfo.Jwtkey = jwtkey;
+                jwtInfo.Issuer = issuer;
+                jwtInfo.Audience = audience;
+
+                var response = _userService.GetUserDetails(userLogin, jwtInfo);
+                if (response != null)
+                {
+                    logger.Info("Login successfull");
+                    return Ok(response);
+                }
+                else
+                {
+                    logger.Error("Incorrect User name or Password");
+                    return BadRequest("Incorrect User name or Password");
+                }
+                
+            }
+            catch(Exception ex)
             {
-                return BadRequest("Incorrect User name or Password");
+                logger.Error(ex.ToString());
+                return BadRequest("Somethinng Went Wrong!");
             }
         }
         
         [HttpPost("AddUser")]
         public ActionResult AddUser(UserInfo user)
         {
-            var response = _userService.AddUserDetails(user);
-
-            if(response)
+            logger.Info("AddUser method called");
+            logger.Info(JsonConvert.SerializeObject(user));
+            try
             {
-                return Ok("User created successfully");
-            }
+                var response = _userService.AddUserDetails(user);
 
-            return NotFound("User already exists");
+                if (response)
+                {
+                    logger.Info("User created successfully " + JsonConvert.SerializeObject(response));
+                    return Ok("User created successfully");
+                }
+
+                logger.Info("User already exists");
+                return NotFound("User already exists");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return BadRequest("Somethinng Went Wrong!");
+            }
         }
 
         [HttpPost("AddRole")]
         public ActionResult AddRole(Role role)
         {
-            if (role.RoleId > 0)
+            logger.Info("AddRole method called ");
+            logger.Info(JsonConvert.SerializeObject(role));
+            try
             {
-                role.RoleId = 0;
-            }
-            var response = _userService.AddRole(role);
-            if (response)
-            {
-              return Ok("Role added successfully");
-            }
+                if (role.RoleId > 0)
+                {
+                    role.RoleId = 0;
+                }
+                var response = _userService.AddRole(role);
+                if (response)
+                {
+                    logger.Info("Role added successfully" + JsonConvert.SerializeObject(response));
+                    return Ok("Role added successfully");
+                }
 
-            return BadRequest("Role already exists");
+                logger.Info("Role already exists");
+                return BadRequest("Role already exists");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return BadRequest("Somethinng Went Wrong!");
+            }
         }
     }
 }

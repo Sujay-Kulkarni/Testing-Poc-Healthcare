@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using log4net;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,33 +15,61 @@ namespace Testing_Poc_Healthcare.Services
     {
         private readonly HealthCareDBContext _dBContext;
         private readonly IMapper _mapper;
+        public ILog logger;
 
         public PatientService(HealthCareDBContext healthCareDBContext, IMapper mapper)
         {
             _dBContext = healthCareDBContext;
             _mapper = mapper;
+            logger = LogManager.GetLogger(typeof(PatientService));
         }
         public bool CreatePatient(PatientDetail patientDetail)
         {
-            var patientInfo = _mapper.Map<PatientInfo>(patientDetail.Personal);
-            var patientAddress = _mapper.Map<PatientAddress>(patientDetail.Address);
+            logger.Info("CreatePatient method called");
+            logger.Info(JsonConvert.SerializeObject(patientDetail));
 
-            patientInfo.CreatedDate = DateTime.Now;
-            patientInfo.CreatedBy = "Admin"; //login user name need to add
-            patientInfo.ModifiedBy = "Admin"; // change to nullable data type
-            
-            _dBContext.PatientInfos.Add(patientInfo);
-            _dBContext.SaveChanges();
-            
-            return CreatePatientAddress(patientInfo.PatientID, patientAddress);
+            try
+            {
+                var patientInfo = _mapper.Map<PatientInfo>(patientDetail.Personal);
+                var patientAddress = _mapper.Map<PatientAddress>(patientDetail.Address);
+
+                patientInfo.CreatedDate = DateTime.Now;
+                patientInfo.CreatedBy = "Admin"; //login user name need to add
+                patientInfo.ModifiedBy = "Admin"; // change to nullable data type
+
+                _dBContext.PatientInfos.Add(patientInfo);
+                _dBContext.SaveChanges();
+
+                logger.Info("Patient Created" + JsonConvert.SerializeObject(patientDetail));
+                return CreatePatientAddress(patientInfo.PatientID, patientAddress);
+            }
+            catch(Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return false;
+            }
         }
 
         public bool CreatePatientAddress(int patientId, PatientAddress address)
         {
-            address.PatientId = patientId;
-            
-            _dBContext.PatientAddresses.Add(address);
-            return _dBContext.SaveChanges() > 0;
+            logger.Info("CreatePatientAddress method called" + patientId);
+            logger.Info(JsonConvert.SerializeObject(address));
+
+            try
+            {
+                address.PatientId = patientId;
+
+                _dBContext.PatientAddresses.Add(address);
+                logger.Info("Created Patient Address");
+
+                logger.Info(JsonConvert.SerializeObject(address));
+                return _dBContext.SaveChanges() > 0;                
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return false;
+            }
         }
 
         public void DeletePatient()
@@ -51,7 +81,6 @@ namespace Testing_Poc_Healthcare.Services
         {
             throw new NotImplementedException();
         }
-
         public List<PersonalDetails> FindPatient(PatientSearch patientSearch)
         {
             if (patientSearch.PatientId > 0)
@@ -78,5 +107,23 @@ namespace Testing_Poc_Healthcare.Services
 
             return null;
         }
+
+        public bool AddBenefit(Benefit benefit)
+        {
+            logger.Info("AddBenefit method called" + benefit);
+            logger.Info(JsonConvert.SerializeObject(benefit));
+
+            try
+            {
+                _dBContext.Benefits.Add(benefit);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return false;
+            }
+        }
+
     }
 }
