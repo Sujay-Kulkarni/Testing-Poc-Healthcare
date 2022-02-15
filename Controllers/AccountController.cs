@@ -1,19 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Testing_Poc_Healthcare.DBContexts;
 using Testing_Poc_Healthcare.Interface;
 using Testing_Poc_Healthcare.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Cors;
 
 namespace Testing_Poc_Healthcare.Controllers
 {
     [Route("api/[controller]")]   
     [ApiController]
+    [AllowAnonymous]
     public class AccountController : ControllerBase
     {
         //private readonly HealthCareDBContext _DBContext;
@@ -35,7 +31,7 @@ namespace Testing_Poc_Healthcare.Controllers
 
     }
 
-        [AllowAnonymous]
+        
         [HttpPost("Login")]        
         public ActionResult Login([FromBody] UserLogin userLogin)
         {
