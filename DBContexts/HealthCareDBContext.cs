@@ -14,8 +14,9 @@ namespace Testing_Poc_Healthcare.DBContexts
         public DbSet<UserRoles> UserRoles { get; set; }
         public DbSet<PatientInfo> PatientInfos { get; set; }
         public DbSet<PatientAddress> PatientAddresses { get; set; }
-        public DbSet<Benefit> Benefits { get; set; }
+        public DbSet<BenefitMaster> Benefitmaster { get; set; }
         public DbSet<InsuranceInfo> InsuranceInfos { get; set; }
+
         public HealthCareDBContext(DbContextOptions<HealthCareDBContext> options) : base(options)
         {
         }

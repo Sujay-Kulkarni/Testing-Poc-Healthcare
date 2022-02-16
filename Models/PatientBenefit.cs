@@ -1,13 +1,20 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Testing_Poc_Healthcare.Models
 {
-    public class Benefit
+    public class PatientBenefit
     {
         [Key]
-        public int BenefitID { get; set; }
+        public int PatientBenefitID { get; set; }
+
+        [ForeignKey("BenefitID")]
+        public virtual BenefitMaster BenefitMaster { get; set; }
+
         [Required]
         public string AccountNumber { get; set; }
         [Required]
@@ -18,22 +25,18 @@ namespace Testing_Poc_Healthcare.Models
 
         [Required]
         public DateTime DateOfBirth { get; set; }
-
-        [Required]
-        public string InsuranceType { get; set; }
-        [Required]
-        public string InsuranceName { get; set; }
-
-        [Required]
-        public string PlanProductName { get; set; }
-
+       
         [Required]
         public string SubscriberId { get; set; }
-        public string CreatedBy { get; set; }        
+
+        public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
-    }
 
-    
+
+       
+
+
+    }
 }

@@ -13,6 +13,7 @@ namespace Testing_Poc_Healthcare.Interface
         void EditPatient();
         void DeletePatient();
         List<PersonalDetails> FindPatient(PatientSearch patientSearch);
-        bool AddBenefit(Benefit benefit);
+        bool AddBenefit(BenefitMaster benefit);
+        PatientDetail PatientSummary(int patientID);
     }
 }
