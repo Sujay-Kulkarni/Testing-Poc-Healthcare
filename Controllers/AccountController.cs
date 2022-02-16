@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.Extensions.Logging;
 using log4net;
 using Newtonsoft.Json;
+using System;
 
 namespace Testing_Poc_Healthcare.Controllers
 {
@@ -17,7 +18,7 @@ namespace Testing_Poc_Healthcare.Controllers
     {
         //private readonly HealthCareDBContext _DBContext;
         private readonly IUserService _userService;
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         public string jwtkey = "";
         public string issuer ="";
         public string audience = "";
@@ -28,13 +29,11 @@ namespace Testing_Poc_Healthcare.Controllers
             _userService = userService;
             _configuration = configuration;
 
-            jwtkey = configuration.GetSection("Jwt").GetSection("Key").Value;
-            issuer = configuration.GetSection("Jwt").GetSection("Issuer").Value;
-            audience = configuration.GetSection("Jwt").GetSection("Audience").Value;
+            jwtkey = _configuration.GetSection("Jwt").GetSection("Key").Value;
+            issuer = _configuration.GetSection("Jwt").GetSection("Issuer").Value;
+            audience = _configuration.GetSection("Jwt").GetSection("Audience").Value;
             logger = LogManager.GetLogger(typeof(AccountController));
-
-    }
-
+        }
         
         [HttpPost("Login")]        
         public ActionResult Login([FromBody] UserLogin userLogin)
@@ -77,7 +76,6 @@ namespace Testing_Poc_Healthcare.Controllers
             try
             {
                 var response = _userService.AddUserDetails(user);
-
                 if (response)
                 {
                     logger.Info("User created successfully " + JsonConvert.SerializeObject(response));
