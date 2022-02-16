@@ -83,39 +83,58 @@ namespace Testing_Poc_Healthcare.Services
         }
         public List<PersonalDetails> FindPatient(PatientSearch patientSearch)
         {
-            if (patientSearch.PatientId > 0)
+
+            logger.Info("FindPatient method called");
+            logger.Info(JsonConvert.SerializeObject(patientSearch));
+
+            try
             {
-                var patientInfos = _dBContext.PatientInfos.Where(p => p.PatientID == patientSearch.PatientId).ToList();
-                return _mapper.Map<List<PersonalDetails>>(patientInfos);
+                if (patientSearch.PatientId > 0)
+                {
+                    var patientInfos = _dBContext.PatientInfos.Where(p => p.PatientID == patientSearch.PatientId).ToList();
+                    logger.Info(JsonConvert.SerializeObject(patientInfos));
+                    return _mapper.Map<List<PersonalDetails>>(patientInfos);
+                }
+                else if (patientSearch.FirstName != null || patientSearch.FirstName != "")
+                {
+                    logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList()));
+                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList());
+                }
+                else if (patientSearch.MiddleName != null || patientSearch.MiddleName != "")
+                {
+                    logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList()));
+                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList());
+                }
+                else if (patientSearch.Lastname != null || patientSearch.Lastname != "")
+                {
+                    logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.Lastname.Contains(patientSearch.Lastname)).ToList()));
+                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.Lastname.Contains(patientSearch.Lastname)).ToList());
+                }
+                else if (patientSearch.ContactNo != null || patientSearch.ContactNo != "")
+                {
+                    logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList()));
+                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList());
+                }
+
+                logger.Info("No records records");
+                return null;
             }
-            else if (patientSearch.FirstName != null || patientSearch.FirstName != "")
+            catch (Exception ex)
             {
-                return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList());
-            }
-            else if (patientSearch.MiddleName != null || patientSearch.MiddleName != "")
-            {
-                return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList());
-            }
-            else if (patientSearch.Lastname != null || patientSearch.Lastname != "")
-            {
-                return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.Lastname.Contains(patientSearch.Lastname)).ToList());
-            }
-            else if (patientSearch.ContactNo != null || patientSearch.ContactNo != "")
-            {
-                return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList());
+                logger.Error(ex.ToString());
+                return null;
             }
 
-            return null;
         }
 
-        public bool AddBenefit(Benefit benefit)
+        public bool AddBenefit(BenefitMaster benefit)
         {
             logger.Info("AddBenefit method called" + benefit);
             logger.Info(JsonConvert.SerializeObject(benefit));
 
             try
             {
-                _dBContext.Benefits.Add(benefit);
+                _dBContext.Benefitmaster.Add(benefit);
                 return true;
             }
             catch (Exception ex)
@@ -124,6 +143,40 @@ namespace Testing_Poc_Healthcare.Services
                 return false;
             }
         }
+        public PatientDetail PatientSummary(int patientId)
+        {
 
+            logger.Info("PatientSummary method called" + patientId);
+            logger.Info(JsonConvert.SerializeObject(patientId));
+
+            try
+            {
+
+                if (patientId > 0)
+                {
+                    var patientInfos = _dBContext.PatientInfos.Where(p => p.PatientID == patientId).FirstOrDefault();
+                    var patientAddressInfo = _dBContext.PatientAddresses.Where(p => p.PatientId == patientId).FirstOrDefault();
+                    //var patientdetails = _mapper.Map<PatientDetail>(patientInfos);
+                    return new PatientDetail
+                    {
+                        Personal = _mapper.Map<PersonalDetails>(patientInfos),
+                        Address = _mapper.Map<AddressDetail>(patientAddressInfo)
+
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return null;
+            }
+
+
+        }
     }
 }

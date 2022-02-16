@@ -80,8 +80,8 @@ namespace Testing_Poc_Healthcare.Controllers
         }
 
 
-        [HttpPost("AddUser")]
-        public ActionResult AddBenefit(Benefit benefits)
+        [HttpPost("AddBenefit")]
+        public ActionResult AddBenefit(BenefitMaster benefits)
         {
             logger.Info("AddBenefit method called");
             logger.Info(JsonConvert.SerializeObject(benefits));
@@ -104,6 +104,33 @@ namespace Testing_Poc_Healthcare.Controllers
                 logger.Error(ex.ToString());
                 return BadRequest("Somethinng Went Wrong!");
             }
+        }
+
+
+        [HttpGet("GetPatientSummary")]
+        public ActionResult GetPatientSummary([FromQuery]int patientID)
+        {
+            logger.Info("PatientSummary method called");
+            logger.Info(JsonConvert.SerializeObject(patientID));
+            try
+            {
+                var response = _patientService.PatientSummary(patientID);
+
+                if (response != null)
+                {
+                    logger.Info(JsonConvert.SerializeObject(response));
+                    return Ok(response);
+                }
+
+                logger.Info("Patient information not found");
+                return BadRequest("Patient information not found");
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex.ToString());
+                return BadRequest("Something went wrong");
+            }
+
         }
 
     }
