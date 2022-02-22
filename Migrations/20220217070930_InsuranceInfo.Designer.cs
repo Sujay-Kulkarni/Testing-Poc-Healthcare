@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Testing_Poc_Healthcare.DBContexts;
 
 namespace Testing_Poc_Healthcare.Migrations
 {
     [DbContext(typeof(HealthCareDBContext))]
-    partial class HealthCareDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220217070930_InsuranceInfo")]
+    partial class InsuranceInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,39 +170,6 @@ namespace Testing_Poc_Healthcare.Migrations
                     b.ToTable("PatientInfos");
                 });
 
-            modelBuilder.Entity("Testing_Poc_Healthcare.Models.PatientInsurance", b =>
-                {
-                    b.Property<int>("PatientInsuranceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("InsuranceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IsActive")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Term")
-                        .HasColumnType("int");
-
-                    b.HasKey("PatientInsuranceId");
-
-                    b.HasIndex("InsuranceId");
-
-                    b.HasIndex("PatientId");
-
-                    b.ToTable("PatientInsurances");
-                });
-
             modelBuilder.Entity("Testing_Poc_Healthcare.Models.Role", b =>
                 {
                     b.Property<int>("RoleId")
@@ -296,25 +265,6 @@ namespace Testing_Poc_Healthcare.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PatientInfo");
-                });
-
-            modelBuilder.Entity("Testing_Poc_Healthcare.Models.PatientInsurance", b =>
-                {
-                    b.HasOne("Testing_Poc_Healthcare.Models.InsuranceInfo", "InsuranceInfo")
-                        .WithMany()
-                        .HasForeignKey("InsuranceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Testing_Poc_Healthcare.Models.PatientInfo", "PatientInfo")
-                        .WithMany()
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("InsuranceInfo");
 
                     b.Navigation("PatientInfo");
                 });

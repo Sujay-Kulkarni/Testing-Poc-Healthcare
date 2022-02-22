@@ -23,9 +23,14 @@ namespace Testing_Poc_Healthcare
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
-
+            var builder = new ConfigurationBuilder()
+               .SetBasePath(env.ContentRootPath)
+               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+               .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+               .AddEnvironmentVariables();
+            this.Configuration = builder.Build();
             Configuration = configuration;
         }
 
@@ -60,6 +65,7 @@ namespace Testing_Poc_Healthcare
             services.AddSwaggerGen();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPatientService, PatientService>();
+            services.AddScoped<IInsuranceService, InsuranceService>();
             services.AddAutoMapper(typeof(PatientProfile));
 
             
@@ -94,7 +100,7 @@ namespace Testing_Poc_Healthcare
             app.UseRouting();
             app.UseCors();
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -10,6 +10,7 @@ namespace Testing_Poc_Healthcare.Models
             CreateMap<PersonalDetails, PatientInfo>().ReverseMap();
             CreateMap<PatientAddress, AddressDetail>().ReverseMap();
             //CreateMap<List<PersonalDetails>, List<PatientInfo>>().ReverseMap();
+            CreateMap<PatientInsurance, PatientInsuranceDetail>().ReverseMap();
         }
     }
 }

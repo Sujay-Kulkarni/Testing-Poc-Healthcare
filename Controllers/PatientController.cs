@@ -16,17 +16,13 @@ namespace Testing_Poc_Healthcare.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+    [Authorize]
     public class PatientController : ControllerBase
     {
-        //private readonly HealthCareDBContext _DBContext;
-        //private readonly IMapper _mapper;
         private readonly IPatientService _patientService;
         private readonly ILog logger;
         public PatientController(IPatientService patientService)
         {
-            //_DBContext = healthCareDBContext;
-            //_mapper = mapper;
             _patientService = patientService;
             logger = LogManager.GetLogger(typeof(PatientController));
         }
@@ -63,14 +59,14 @@ namespace Testing_Poc_Healthcare.Controllers
             {
                 var response = _patientService.FindPatient(patientSearch);
 
-                if (response != null)
+                if (response.Count() > 0)
                 {
                     logger.Info(JsonConvert.SerializeObject(response));
                     return Ok(response);
                 }
 
-                logger.Info("Patient not found");
-                return BadRequest("Patient not found");
+                logger.Info("Member not found");
+                return BadRequest("Member not found");
             }
             catch (Exception ex)
             {

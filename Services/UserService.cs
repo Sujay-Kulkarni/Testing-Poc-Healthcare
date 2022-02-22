@@ -112,10 +112,8 @@ namespace Testing_Poc_Healthcare.Services
                         LastLogin = userDetails.LastLogin,
                         RoleName = "0",
                         UserId = userDetails.UserId,
-                        Token = tokenkey
-
+                        Token = tokenkey,
                     };
-
                 }
                 else
                 {

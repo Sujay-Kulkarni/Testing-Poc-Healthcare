@@ -13,6 +13,8 @@ namespace Testing_Poc_Healthcare.Models
         [Required]
         public string PlanName { get; set; }
         [Required]
+        public string InsuranceType { get; set; }
+        [Required]
         public int PlanDuration { get; set; }
         [Required]
         public DateTime PlanStartDate { get; set; }

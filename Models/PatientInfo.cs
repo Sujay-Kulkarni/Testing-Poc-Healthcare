@@ -12,9 +12,9 @@ namespace Testing_Poc_Healthcare.Models
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         [Required]
-        public string Lastname { get; set; }
-        [DefaultValue(true)]
-        public bool Gender { get; set; }
+        public string LastName { get; set; }
+        [DefaultValue("Male")]
+        public string Gender { get; set; }
         [Required]
         public DateTime DateOfBirth { get; set; }
         [Required]
@@ -40,8 +40,8 @@ namespace Testing_Poc_Healthcare.Models
         public string MiddleName { get; set; }
         [Required]
         public string Lastname { get; set; }
-        [DefaultValue(true)]
-        public bool Gender { get; set; }
+        [DefaultValue("Male")]
+        public string Gender { get; set; }
         [Required]
         public DateTime DateOfBirth { get; set; }
         [Required]

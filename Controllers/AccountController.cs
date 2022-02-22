@@ -13,7 +13,7 @@ namespace Testing_Poc_Healthcare.Controllers
 {
     [Route("api/[controller]")]   
     [ApiController]
-    [AllowAnonymous]
+    
     public class AccountController : ControllerBase
     {
         //private readonly HealthCareDBContext _DBContext;
@@ -34,7 +34,8 @@ namespace Testing_Poc_Healthcare.Controllers
             audience = _configuration.GetSection("Jwt").GetSection("Audience").Value;
             logger = LogManager.GetLogger(typeof(AccountController));
         }
-        
+
+        [AllowAnonymous]
         [HttpPost("Login")]        
         public ActionResult Login([FromBody] UserLogin userLogin)
         {
@@ -67,8 +68,10 @@ namespace Testing_Poc_Healthcare.Controllers
                 return BadRequest("Somethinng Went Wrong!");
             }
         }
+
         
         [HttpPost("AddUser")]
+        [Authorize]
         public ActionResult AddUser(UserInfo user)
         {
             logger.Info("AddUser method called");
@@ -92,6 +95,7 @@ namespace Testing_Poc_Healthcare.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("AddRole")]
         public ActionResult AddRole(Role role)
         {

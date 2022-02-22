@@ -76,7 +76,6 @@ namespace Testing_Poc_Healthcare.Services
         {
             throw new NotImplementedException();
         }
-
         public void EditPatient()
         {
             throw new NotImplementedException();
@@ -107,8 +106,8 @@ namespace Testing_Poc_Healthcare.Services
                 }
                 else if (patientSearch.Lastname != null || patientSearch.Lastname != "")
                 {
-                    logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.Lastname.Contains(patientSearch.Lastname)).ToList()));
-                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.Lastname.Contains(patientSearch.Lastname)).ToList());
+                    logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList()));
+                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList());
                 }
                 else if (patientSearch.ContactNo != null || patientSearch.ContactNo != "")
                 {
@@ -126,7 +125,6 @@ namespace Testing_Poc_Healthcare.Services
             }
 
         }
-
         public bool AddBenefit(BenefitMaster benefit)
         {
             logger.Info("AddBenefit method called" + benefit);
@@ -145,7 +143,6 @@ namespace Testing_Poc_Healthcare.Services
         }
         public PatientDetail PatientSummary(int patientId)
         {
-
             logger.Info("PatientSummary method called" + patientId);
             logger.Info(JsonConvert.SerializeObject(patientId));
 
@@ -175,8 +172,6 @@ namespace Testing_Poc_Healthcare.Services
                 logger.Error(ex.ToString());
                 return null;
             }
-
-
         }
     }
 }

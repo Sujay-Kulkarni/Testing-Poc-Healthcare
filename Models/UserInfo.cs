@@ -31,7 +31,6 @@ namespace Testing_Poc_Healthcare.Models
         public DateTime? LastLogin { get; set; }
     }
 
-    [NotMapped]
     public class UserInfoVM {
         public int UserId { get; set; }
         [Required]
