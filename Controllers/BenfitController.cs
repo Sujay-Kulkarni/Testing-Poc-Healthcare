@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Testing_Poc_Healthcare.Interface;
 using Testing_Poc_Healthcare.Models;
 
@@ -11,6 +8,7 @@ namespace Testing_Poc_Healthcare.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BenfitController : ControllerBase
     {
         private readonly IInsuranceService _insuranceService;
@@ -21,15 +19,20 @@ namespace Testing_Poc_Healthcare.Controllers
         [HttpGet("GetAllBenfitPlan")]
         public ActionResult GetAllPlan()
         {
-            throw new NotImplementedException();
+            var objReponse = _insuranceService.GetAllPlans();
+            if (objReponse.Status == "Success")
+            {
+                return Ok(objReponse);
+            }
+            return BadRequest(objReponse);
         }
 
         [HttpPost("AddBenfitPlan")]
         public ActionResult Add([FromBody] InsuranceInfo insuranceInfo)
         {
-            var objResponse = _insuranceService.AddOrEditBenfitPlan(insuranceInfo);
+            var objResponse = _insuranceService.AddBenfitPlan(insuranceInfo);
 
-            if(objResponse.Status == "Success")
+            if (objResponse.Status == "Success")
             {
                 return Ok(objResponse);
             } else
@@ -38,10 +41,14 @@ namespace Testing_Poc_Healthcare.Controllers
             }
         }
 
-        [HttpPut("EditBenfitPlan")]
-        public ActionResult Edit([FromBody] InsuranceInfo insuranceInfo)
+        [HttpPut("{benfitPlanId}")]
+        public ActionResult Edit(int benfitPlanId, InsuranceInfo insuranceInfo)
         {
-            var objResponse = _insuranceService.AddOrEditBenfitPlan(insuranceInfo);
+            if(benfitPlanId != insuranceInfo.InsuranceInfoId)
+            {
+                return BadRequest(new ResponseStatus { Status = "Error", Message = "Invalid benfit id" });
+            }
+            var objResponse = _insuranceService.EditBenfitPlan(insuranceInfo);
 
             if (objResponse.Status == "Success")
             {
@@ -52,11 +59,18 @@ namespace Testing_Poc_Healthcare.Controllers
                 return BadRequest(objResponse);
             }
         }
-
-        [HttpDelete("DeleteBenfitPlan")]
-        public ActionResult DeletePlan([FromQuery]int benfitPlanId)
+        
+        [HttpDelete("{benfitPlanId}")]
+        public ActionResult DeletePlan(int benfitPlanId)
         {
-            throw new NotImplementedException();
+            var response = _insuranceService.RemoveBenfitPlan(benfitPlanId);
+            if(response.Status == "Success")
+            {
+                return Ok(response);
+            } else
+            {
+                return BadRequest(response);
+            }
         }
 
         [HttpPost("AssignBenfitPlan")]

@@ -5,9 +5,12 @@ namespace Testing_Poc_Healthcare.Interface
 {
     public interface IInsuranceService
     {
-        ResponseStatus AddOrEditBenfitPlan(InsuranceInfo insuranceInfo);
+        ResponseStatus AddBenfitPlan(InsuranceInfo insuranceInfo);
+        ResponseStatus EditBenfitPlan(InsuranceInfo insuranceInfo);
         ResponseStatus AssiganBenfitPlan(PatientInsuranceDetail insuranceDetail);
         ResponseStatus ChangeBenfitPlan(PatientInsuranceDetail insuranceDetail);
-        List<string> GetAllPlans();
+        BenfitPlanList GetAllPlans();
+        BenfitPlanList GetAllBenfitPlanByPatientId(int patitentId);
+        ResponseStatus RemoveBenfitPlan(int insuranceInfoId);
     }
 }

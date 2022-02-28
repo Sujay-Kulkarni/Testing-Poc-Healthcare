@@ -75,34 +75,6 @@ namespace Testing_Poc_Healthcare.Controllers
             }
         }
 
-
-        [HttpPost("AddBenefit")]
-        public ActionResult AddBenefit(BenefitMaster benefits)
-        {
-            logger.Info("AddBenefit method called");
-            logger.Info(JsonConvert.SerializeObject(benefits));
-
-            try
-            {
-                var response = _patientService.AddBenefit(benefits);
-
-                if (response)
-                {
-                    logger.Info("User created successfully " + JsonConvert.SerializeObject(response));
-                    return Ok("User created successfully");
-                }
-
-                logger.Info("User already exists");
-                return NotFound("User already exists");
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex.ToString());
-                return BadRequest("Somethinng Went Wrong!");
-            }
-        }
-
-
         [HttpGet("GetPatientSummary")]
         public ActionResult GetPatientSummary([FromQuery]int patientID)
         {

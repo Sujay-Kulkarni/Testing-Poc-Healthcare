@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Testing_Poc_Healthcare.Interface;
 
 namespace Testing_Poc_Healthcare.Models
 {
@@ -24,5 +26,15 @@ namespace Testing_Poc_Healthcare.Models
         [Required]
         public bool IsAcive { get; set; }
         public string Description { get; set; }
+    }
+
+    public class BenfitPlanList : ResponseStatus, IData<List<InsuranceInfo>>
+    {
+        public List<InsuranceInfo> Data { get ; set; }
+    }
+
+    public class AssignedBenfitPlanList : ResponseStatus, IData<List<PatientInsuranceDetail>>
+    {
+        public List<PatientInsuranceDetail> Data { get; set; }
     }
 }

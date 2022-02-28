@@ -18,19 +18,15 @@ namespace Testing_Poc_Healthcare.Services
             _dBContext = healthCareDB;
             _mapper = mapper;
         }
-        public ResponseStatus AddOrEditBenfitPlan(InsuranceInfo insuranceInfo)
+        public ResponseStatus AddBenfitPlan(InsuranceInfo insuranceInfo)
         {
             try {
-                var benfitPlanDetails = _dBContext.InsuranceInfos
-                                        .Where(i => i.InsuranceInfoId == insuranceInfo.InsuranceInfoId)
-                                        .FirstOrDefault();
-                if (benfitPlanDetails == null)
-                { 
                     var isPlanExists = _dBContext.InsuranceInfos
                                         .Where(i => i.CompanyName == insuranceInfo.CompanyName && i.PlanName == insuranceInfo.PlanName)
                                         .Count() > 0;
                     if (!isPlanExists)
                     {
+                        insuranceInfo.PlanName = string.Concat(insuranceInfo.CompanyName, "-", insuranceInfo.PlanName).ToUpper();
                         _dBContext.InsuranceInfos.Add(insuranceInfo);
                         var result = _dBContext.SaveChanges() > 0;
                         if (result)
@@ -42,33 +38,14 @@ namespace Testing_Poc_Healthcare.Services
                         else
                             return new ResponseStatus { 
                             Status="Error",
-                            Message="Error occured while saving the recored"
+                            Message="Error occured while saving the benfit plan"
                             };
                     }
                     return new ResponseStatus
                     {
                         Status = "Error",
-                        Message = "Record already exists"
+                        Message = "Benfit plan already exists"
                     };
-                } else
-                {
-                    _dBContext.ChangeTracker.Clear(); //Clear the entity tracking
-                    _dBContext.InsuranceInfos.Update(insuranceInfo);
-                   var result = _dBContext.SaveChanges() > 0;
-                    if (result)
-                        return new ResponseStatus
-                        {
-                            Status = "Success",
-                            Message = "Record updated successfully"
-                        };
-                    else
-                        return new ResponseStatus
-                        {
-                            Status = "Error",
-                            Message = "Error occured while updating the recored"
-                        };
-                }
-            
             } catch (Exception ex)
             {
                 return new ResponseStatus
@@ -126,9 +103,26 @@ namespace Testing_Poc_Healthcare.Services
             }
         }
 
-        public List<string> GetAllPlans()
+        public BenfitPlanList GetAllPlans()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var lstBenfitPlan = _dBContext.InsuranceInfos.OrderBy(o => o.InsuranceInfoId).ToList();
+                if (lstBenfitPlan.Count() > 0)
+                {
+                    return new BenfitPlanList { Status = "Success", Message = string.Empty, Data = lstBenfitPlan };
+                }
+                return new BenfitPlanList { Status = "Error", Message = "No record found", Data = null };
+            }
+            catch (Exception ex)
+            {
+                return new BenfitPlanList
+                {
+                    Status = "Error",
+                    Message = ex.Message,
+                    Data = null
+                };
+            }
         }
 
         public ResponseStatus ChangeBenfitPlan(PatientInsuranceDetail insuranceDetail)
@@ -170,6 +164,122 @@ namespace Testing_Poc_Healthcare.Services
             } catch(Exception ex) {
                 transaction.RollbackToSavepoint("BeforeBenfitPlanRemove");
                 return new ResponseStatus { Status = "Error", Message = ex.Message };
+            }
+        }
+
+        public BenfitPlanList GetAllBenfitPlanByPatientId(int patitentId)
+        {
+            try {
+                if(patitentId <= 0 )
+                {
+                    return new BenfitPlanList { Status = "Error", Message = "Invalid patientId", Data = null };
+                } else
+                {
+                    var isValidPatientId = _dBContext.PatientInfos.Where(p => p.PatientID == patitentId).Count() == 1;
+                    if(isValidPatientId)
+                    {
+                        //var assignedPlans = _dBContext.PatientInsurances
+                        //                    .Join(_dBContext.InsuranceInfos,
+                        //                     )
+                        //    //.Where(a => a.PatientId == patitentId).ToList();
+
+                        var assignedPlans = (from p in _dBContext.PatientInsurances
+                                             join i in _dBContext.InsuranceInfos
+                                             on p.InsuranceId equals i.InsuranceInfoId
+                                             select new {
+                                                 i.CompanyName,
+                                                 i.PlanName,
+                                                 i.InsuranceType,
+                                                 i.PlanDuration,
+
+                                             }
+                                             );
+                        if(assignedPlans.Count() > 0)
+                        {
+                            return new BenfitPlanList { Status = "Success", Message = "Implementation is in progress", Data = null };
+                        }
+                        else
+                        {
+                            return new BenfitPlanList { Status = "Success", Message = "No record found", Data = null };
+                        }
+                    } else
+                    {
+                        return new BenfitPlanList { Status = "Error", Message = "Invalid patientId", Data = null };
+                    }
+                }
+            } catch(Exception ex)
+            {
+                return new BenfitPlanList { Status = "Error", Message = ex.Message, Data = null };
+            }
+        }
+
+        public ResponseStatus RemoveBenfitPlan(int insuranceInfoId)
+        {
+            try
+            {
+                if(insuranceInfoId >0)
+                {
+                    var getBenfitPlan = _dBContext.InsuranceInfos.Where(e => e.InsuranceInfoId == insuranceInfoId).FirstOrDefault();
+
+                    if(getBenfitPlan != null)
+                    {
+                        _dBContext.InsuranceInfos.Remove(getBenfitPlan);
+                        var status = _dBContext.SaveChanges() > 0;
+                        if(status)
+                        {
+                            return new ResponseStatus { Status = "Success", Message = "Benfit plan removed successfully" };
+                        } else
+                            return new ResponseStatus { Status = "Error", Message = "Error occured while removing benfit plan" };
+                    } else
+                        return new ResponseStatus { Status = "Error", Message = "Benfit plan id dosenot exist" };
+                }
+                else
+                    return new ResponseStatus { Status = "Error", Message = "Invalid benfit plan id" };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseStatus { Status = "Error", Message = ex.Message };
+            }
+        }
+
+        public ResponseStatus EditBenfitPlan(InsuranceInfo insuranceInfo)
+        {
+            try
+            {
+                var benfitPlanDetails = _dBContext.InsuranceInfos
+                                        .Where(i => i.InsuranceInfoId == insuranceInfo.InsuranceInfoId)
+                                        .FirstOrDefault();
+                if (benfitPlanDetails == null)
+                {
+                    return new ResponseStatus { Status = "Error", Message = "benefits id doesn't exist" };
+                }
+                else
+                {
+                    _dBContext.ChangeTracker.Clear(); //Clear the entity tracking
+                    _dBContext.InsuranceInfos.Update(insuranceInfo);
+                    var result = _dBContext.SaveChanges() > 0;
+                    if (result)
+                        return new ResponseStatus
+                        {
+                            Status = "Success",
+                            Message = "Benfit plan updated successfully"
+                        };
+                    else
+                        return new ResponseStatus
+                        {
+                            Status = "Error",
+                            Message = "Error occured while updating the benfit plan"
+                        };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new ResponseStatus
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                };
             }
         }
     }

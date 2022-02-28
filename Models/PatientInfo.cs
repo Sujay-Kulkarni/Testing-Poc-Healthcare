@@ -29,6 +29,8 @@ namespace Testing_Poc_Healthcare.Models
         public DateTime CreatedDate { get; set; }
         public string ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
+        [Required(ErrorMessage ="Please enter SSN Id")]
+        public int SSN { get; set; }
     }
 
     public class PersonalDetails
@@ -50,5 +52,7 @@ namespace Testing_Poc_Healthcare.Models
         public string Email { get; set; }
         [Required]
         public string ContactNo { get; set; }
+        [Required(ErrorMessage = "Please enter SSN Id")]
+        public int SSN { get; set; }
     }
 }

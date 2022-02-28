@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using log4net;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -94,25 +95,28 @@ namespace Testing_Poc_Healthcare.Services
                     logger.Info(JsonConvert.SerializeObject(patientInfos));
                     return _mapper.Map<List<PersonalDetails>>(patientInfos);
                 }
-                else if (patientSearch.FirstName != null || patientSearch.FirstName != "")
+                else if (!string.IsNullOrEmpty(patientSearch.FirstName))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList()));
                     return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList());
                 }
-                else if (patientSearch.MiddleName != null || patientSearch.MiddleName != "")
+                else if (!string.IsNullOrEmpty(patientSearch.MiddleName))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList()));
                     return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList());
                 }
-                else if (patientSearch.Lastname != null || patientSearch.Lastname != "")
+                else if (!string.IsNullOrEmpty(patientSearch.Lastname))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList()));
                     return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList());
                 }
-                else if (patientSearch.ContactNo != null || patientSearch.ContactNo != "")
+                else if (!string.IsNullOrEmpty(patientSearch.ContactNo))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList()));
                     return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList());
+                } else if(patientSearch.DateOfBirth.HasValue)
+                {
+                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.DateOfBirth.Date == patientSearch.DateOfBirth.Value));
                 }
 
                 logger.Info("No records records");
@@ -158,7 +162,6 @@ namespace Testing_Poc_Healthcare.Services
                     {
                         Personal = _mapper.Map<PersonalDetails>(patientInfos),
                         Address = _mapper.Map<AddressDetail>(patientAddressInfo)
-
                     };
                 }
                 else
