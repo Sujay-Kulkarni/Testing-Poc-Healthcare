@@ -35,18 +35,18 @@ namespace Testing_Poc_Healthcare.Controllers
             try
             {
                 var response = _patientService.CreatePatient(patientDetail);
-                if (response)
+                if (response.Status == "Success")
                 {
                     logger.Info("Patient enrolled successfully " +JsonConvert.SerializeObject(response));
-                    return Ok("Patient enrolled successfully");
+                    return Ok(response);
                 }
                 logger.Info("Something went wrong");
-                return BadRequest("Something went wrong");
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
                 logger.Error(ex.ToString());
-                return BadRequest("Something went wrong");
+                return BadRequest("Something went wrong" + ex.Message);
             }
         }
 

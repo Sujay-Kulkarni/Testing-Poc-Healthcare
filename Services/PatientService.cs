@@ -16,15 +16,17 @@ namespace Testing_Poc_Healthcare.Services
     {
         private readonly HealthCareDBContext _dBContext;
         private readonly IMapper _mapper;
+        private readonly IInsuranceService _insuranceService;
         public ILog logger;
 
-        public PatientService(HealthCareDBContext healthCareDBContext, IMapper mapper)
+        public PatientService(HealthCareDBContext healthCareDBContext, IMapper mapper, IInsuranceService service)
         {
             _dBContext = healthCareDBContext;
             _mapper = mapper;
+            _insuranceService = service;
             logger = LogManager.GetLogger(typeof(PatientService));
         }
-        public bool CreatePatient(PatientDetail patientDetail)
+        public PatientResponse CreatePatient(PatientDetail patientDetail)
         {
             logger.Info("CreatePatient method called");
             logger.Info(JsonConvert.SerializeObject(patientDetail));
@@ -39,19 +41,28 @@ namespace Testing_Poc_Healthcare.Services
                 patientInfo.ModifiedBy = "Admin"; // change to nullable data type
 
                 _dBContext.PatientInfos.Add(patientInfo);
-                _dBContext.SaveChanges();
+                var satus = _dBContext.SaveChanges() > 0;
 
-                logger.Info("Patient Created" + JsonConvert.SerializeObject(patientDetail));
-                return CreatePatientAddress(patientInfo.PatientID, patientAddress);
+                if(satus)
+                {
+                    logger.Info("Patient Created" + JsonConvert.SerializeObject(patientDetail));
+                    CreatePatientAddress(patientInfo.PatientID, patientAddress);
+                    logger.Info("Patient Created" + JsonConvert.SerializeObject(patientDetail));
+
+                    return new PatientResponse { Status = "Success", Message = "Member created successfully", Data = patientInfo.PatientID };
+                } else
+                {
+                    return new PatientResponse { Status = "Error", Message = "Error occured while enrolling member" };
+                }
             }
             catch(Exception ex)
             {
                 logger.Error(ex.ToString());
-                return false;
+                return new PatientResponse { Status = "Error", Message = ex.Message };
             }
         }
 
-        public bool CreatePatientAddress(int patientId, PatientAddress address)
+        public PatientResponse CreatePatientAddress(int patientId, PatientAddress address)
         {
             logger.Info("CreatePatientAddress method called" + patientId);
             logger.Info(JsonConvert.SerializeObject(address));
@@ -64,12 +75,20 @@ namespace Testing_Poc_Healthcare.Services
                 logger.Info("Created Patient Address");
 
                 logger.Info(JsonConvert.SerializeObject(address));
-                return _dBContext.SaveChanges() > 0;                
+                var status =  _dBContext.SaveChanges() > 0;
+                if(status)
+                {
+                    return new PatientResponse { Status = "Success", Message = "Member address added successfully" };
+                } else
+                {
+                    return new PatientResponse { Status = "Error", Message = "Member address added successfully" };
+                }
+
             }
             catch (Exception ex)
             {
                 logger.Error(ex.ToString());
-                return false;
+                return new PatientResponse { Status = "Error", Message = ex.Message };
             }
         }
 
@@ -129,23 +148,23 @@ namespace Testing_Poc_Healthcare.Services
             }
 
         }
-        public bool AddBenefit(BenefitMaster benefit)
-        {
-            logger.Info("AddBenefit method called" + benefit);
-            logger.Info(JsonConvert.SerializeObject(benefit));
+        //public bool AddBenefit(BenefitMaster benefit)
+        //{
+        //    logger.Info("AddBenefit method called" + benefit);
+        //    logger.Info(JsonConvert.SerializeObject(benefit));
 
-            try
-            {
-                _dBContext.Benefitmaster.Add(benefit);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex.ToString());
-                return false;
-            }
-        }
-        public PatientDetail PatientSummary(int patientId)
+        //    try
+        //    {
+        //        _dBContext.Benefitmaster.Add(benefit);
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex.ToString());
+        //        return false;
+        //    }
+        //}
+        public MemberSummary PatientSummary(int patientId)
         {
             logger.Info("PatientSummary method called" + patientId);
             logger.Info(JsonConvert.SerializeObject(patientId));
@@ -157,16 +176,18 @@ namespace Testing_Poc_Healthcare.Services
                 {
                     var patientInfos = _dBContext.PatientInfos.Where(p => p.PatientID == patientId).FirstOrDefault();
                     var patientAddressInfo = _dBContext.PatientAddresses.Where(p => p.PatientId == patientId).FirstOrDefault();
-                    //var patientdetails = _mapper.Map<PatientDetail>(patientInfos);
-                    return new PatientDetail
+                    var benefitDetails = _insuranceService.GetAllBenfitPlanByPatientId(patientId);
+                    
+                    return new MemberSummary
                     {
                         Personal = _mapper.Map<PersonalDetails>(patientInfos),
-                        Address = _mapper.Map<AddressDetail>(patientAddressInfo)
+                        Address = _mapper.Map<AddressDetail>(patientAddressInfo),
+                        BenfitPlanList = benefitDetails
                     };
                 }
                 else
                 {
-                    return null;
+                    return new MemberSummary {  };
                 }
 
             }

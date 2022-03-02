@@ -33,8 +33,19 @@ namespace Testing_Poc_Healthcare.Models
         public List<InsuranceInfo> Data { get ; set; }
     }
 
-    public class AssignedBenfitPlanList : ResponseStatus, IData<List<PatientInsuranceDetail>>
+    public class AssignedBenefitPlan
     {
-        public List<PatientInsuranceDetail> Data { get; set; }
+        public int PatientInsuranceId { get; set; }
+        public string CompanyName { get; set; }
+        public string PlanName { get; set; }
+        public string InsuranceType { get; set; }
+        public int Term { get; set; }
+        public Status IsActive { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
+    public class AssignedBenfitPlanList : ResponseStatus, IData<List<AssignedBenefitPlan>>
+    {
+        public List<AssignedBenefitPlan> Data { get; set; }
     }
 }

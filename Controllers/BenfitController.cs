@@ -77,12 +77,32 @@ namespace Testing_Poc_Healthcare.Controllers
         public ActionResult AssignBenfitPlan([FromBody] PatientInsuranceDetail insuranceDetail)
         {
             var response = _insuranceService.AssiganBenfitPlan(insuranceDetail);
-            if (response.Status == "Scccess")
+            if (response.Status == "Success")
             {
                 return Ok(response);
             }
             else
                 return BadRequest(response);
+        }
+
+        [HttpPost("ChangeBenfitPlan")]
+        public ActionResult ChangeBenfitPlan([FromBody] PatientInsuranceDetail insuranceDetail)
+        {
+            var response = _insuranceService.ChangeBenfitPlan(insuranceDetail);
+
+            if(response.Status == "Success")
+            {
+                return Ok(response);
+            } else
+            {
+                return BadRequest(response);
+            }
+        }
+
+        [HttpDelete("RemoveAssignedBenfitPlanById/{assignedPlanId}")]
+        public ActionResult TerminateBenefitPlan(int assignedPlanId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

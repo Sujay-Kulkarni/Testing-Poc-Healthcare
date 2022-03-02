@@ -18,7 +18,7 @@ namespace Testing_Poc_Healthcare.Services
             _dBContext = healthCareDB;
             _mapper = mapper;
         }
-        public ResponseStatus AddBenfitPlan(InsuranceInfo insuranceInfo)
+        public BenefitResponse AddBenfitPlan(InsuranceInfo insuranceInfo)
         {
             try {
                     var isPlanExists = _dBContext.InsuranceInfos
@@ -30,25 +30,25 @@ namespace Testing_Poc_Healthcare.Services
                         _dBContext.InsuranceInfos.Add(insuranceInfo);
                         var result = _dBContext.SaveChanges() > 0;
                         if (result)
-                            return new ResponseStatus
-                            {
+                            return new BenefitResponse {
                                 Status = "Success",
-                                Message = "Benfit plan added successfully"
+                                Message = "Benfit plan added successfully",
+                                Data = insuranceInfo.InsuranceInfoId
                             };
                         else
-                            return new ResponseStatus { 
+                            return new BenefitResponse { 
                             Status="Error",
                             Message="Error occured while saving the benfit plan"
                             };
                     }
-                    return new ResponseStatus
+                    return new BenefitResponse
                     {
                         Status = "Error",
                         Message = "Benfit plan already exists"
                     };
             } catch (Exception ex)
             {
-                return new ResponseStatus
+                return new BenefitResponse
                 {
                     Status = "Error",
                     Message = ex.Message
@@ -56,13 +56,13 @@ namespace Testing_Poc_Healthcare.Services
             }
         }
 
-        public ResponseStatus AssiganBenfitPlan(PatientInsuranceDetail insuranceDetail)
+        public BenefitResponse AssiganBenfitPlan(PatientInsuranceDetail insuranceDetail)
         {
             try
             {
                 if (insuranceDetail.PatientId <= 0 || insuranceDetail.InsuranceId <= 0)
                 {
-                    return new ResponseStatus
+                    return new BenefitResponse
                     {
                         Status = "Error",
                         Message = "Member/Benfit id is incorrect"
@@ -80,22 +80,22 @@ namespace Testing_Poc_Healthcare.Services
                         var result = _dBContext.SaveChanges() > 0;
                         if (result)
                         {
-                            return new ResponseStatus { Status = "Success", Message = "Benfit plan assigned to the member" };
+                            return new BenefitResponse { Status = "Success", Message = "Benfit plan assigned to the member", Data=mapModel.InsuranceId };
                         }
                         else
                         {
-                            return new ResponseStatus { Status = "Error", Message = "Error occured while assiging benfit plan" };
+                            return new BenefitResponse { Status = "Error", Message = "Error occured while assiging benfit plan" };
                         }
                     }
                     else
                     {
-                        return new ResponseStatus { Status = "Error", Message = "Benfit plan assigned to the mmber" };
+                        return new BenefitResponse { Status = "Error", Message = "Benfit plan assigned to the mmber" };
                     }
                     
                 }
             } catch(Exception ex)
             {
-                return new ResponseStatus
+                return new BenefitResponse
                 {
                     Status = "Error",
                     Message = ex.Message
@@ -125,12 +125,12 @@ namespace Testing_Poc_Healthcare.Services
             }
         }
 
-        public ResponseStatus ChangeBenfitPlan(PatientInsuranceDetail insuranceDetail)
+        public BenefitResponse ChangeBenfitPlan(PatientInsuranceDetail insuranceDetail)
         {
             using var transaction = _dBContext.Database.BeginTransaction();
             try {
                 if (insuranceDetail.PatientId <= 0 || insuranceDetail.InsuranceId <= 0) {
-                    return new ResponseStatus { Status = "Error", Message = "Member/Benfit id is incorrect" };
+                    return new BenefitResponse { Status = "Error", Message = "Member/Benfit id is incorrect" };
                 } else { 
                     if(insuranceDetail.OldBenfitPlanId.HasValue)
                     {
@@ -150,66 +150,66 @@ namespace Testing_Poc_Healthcare.Services
                                 _dBContext.PatientInsurances.Add(mappedModel);
                                 var isNewPlanAssigned = _dBContext.SaveChanges() > 0;
 
-                                if (isNewPlanAssigned) { return new ResponseStatus { Status = "Sucess", Message = "Benfit plan changed successfully " }; }
+                                if (isNewPlanAssigned) { return new BenefitResponse { Status = "Sucess", Message = "Benfit plan changed successfully " }; }
                                 else { 
                                     transaction.RollbackToSavepoint("BeforeBenfitPlanRemove");
-                                    return new ResponseStatus { Status = "Error", Message = "Error occured while changing benfit plan" };
+                                    return new BenefitResponse { Status = "Error", Message = "Error occured while changing benfit plan" };
                                 }
-                            } else { return new ResponseStatus { Status = "Error", Message = "Error occured while removing existing plan" }; }
-                        } else { return new ResponseStatus { Status = "Error", Message = "No active benfit plan assigned to member" }; }
+                            } else { return new BenefitResponse { Status = "Error", Message = "Error occured while removing existing plan" }; }
+                        } else { return new BenefitResponse { Status = "Error", Message = "No active benfit plan assigned to member" }; }
 
                     }
-                    return new ResponseStatus { Status = "Error", Message = "Existing benfit plan details are missing" };
+                    return new BenefitResponse { Status = "Error", Message = "Existing benfit plan details are missing" };
                 }
             } catch(Exception ex) {
                 transaction.RollbackToSavepoint("BeforeBenfitPlanRemove");
-                return new ResponseStatus { Status = "Error", Message = ex.Message };
+                return new BenefitResponse { Status = "Error", Message = ex.Message };
             }
         }
 
-        public BenfitPlanList GetAllBenfitPlanByPatientId(int patitentId)
+        public AssignedBenfitPlanList GetAllBenfitPlanByPatientId(int patitentId)
         {
             try {
                 if(patitentId <= 0 )
                 {
-                    return new BenfitPlanList { Status = "Error", Message = "Invalid patientId", Data = null };
+                    return new AssignedBenfitPlanList { Status = "Error", Message = "Invalid patientId", Data = null };
                 } else
                 {
                     var isValidPatientId = _dBContext.PatientInfos.Where(p => p.PatientID == patitentId).Count() == 1;
                     if(isValidPatientId)
                     {
-                        //var assignedPlans = _dBContext.PatientInsurances
-                        //                    .Join(_dBContext.InsuranceInfos,
-                        //                     )
-                        //    //.Where(a => a.PatientId == patitentId).ToList();
-
-                        var assignedPlans = (from p in _dBContext.PatientInsurances
+                        List<AssignedBenefitPlan> assignedPlans = (from p in _dBContext.PatientInsurances
                                              join i in _dBContext.InsuranceInfos
                                              on p.InsuranceId equals i.InsuranceInfoId
-                                             select new {
-                                                 i.CompanyName,
-                                                 i.PlanName,
-                                                 i.InsuranceType,
-                                                 i.PlanDuration,
-
+                                             where p.PatientId == patitentId
+                                             select new AssignedBenefitPlan { 
+                                                 PatientInsuranceId = p.PatientInsuranceId,
+                                                 CompanyName = i.CompanyName,
+                                                 PlanName = i.PlanName,
+                                                 InsuranceType =  i.InsuranceType,
+                                                 Term =  i.PlanDuration,
+                                                 StartDate = p.StartDate,
+                                                 EndDate = p.EndDate,
+                                                 IsActive = p.IsActive
                                              }
-                                             );
+                                             ).ToList();
+                       
                         if(assignedPlans.Count() > 0)
                         {
-                            return new BenfitPlanList { Status = "Success", Message = "Implementation is in progress", Data = null };
+                            return new AssignedBenfitPlanList { Status = "Success", Message = "", Data = assignedPlans };
                         }
                         else
                         {
-                            return new BenfitPlanList { Status = "Success", Message = "No record found", Data = null };
+                            return new AssignedBenfitPlanList { Status = "Success", Message = "No record found", Data = null };
                         }
                     } else
                     {
-                        return new BenfitPlanList { Status = "Error", Message = "Invalid patientId", Data = null };
+                        return new AssignedBenfitPlanList { Status = "Error", Message = "Invalid patientId", Data = null };
                     }
                 }
             } catch(Exception ex)
             {
-                return new BenfitPlanList { Status = "Error", Message = ex.Message, Data = null };
+                return new AssignedBenfitPlanList { Status = "Error", Message = ex.Message, Data = null };
             }
         }
 
@@ -242,7 +242,7 @@ namespace Testing_Poc_Healthcare.Services
             }
         }
 
-        public ResponseStatus EditBenfitPlan(InsuranceInfo insuranceInfo)
+        public BenefitResponse EditBenfitPlan(InsuranceInfo insuranceInfo)
         {
             try
             {
@@ -251,7 +251,7 @@ namespace Testing_Poc_Healthcare.Services
                                         .FirstOrDefault();
                 if (benfitPlanDetails == null)
                 {
-                    return new ResponseStatus { Status = "Error", Message = "benefits id doesn't exist" };
+                    return new BenefitResponse { Status = "Error", Message = "benefits id doesn't exist" };
                 }
                 else
                 {
@@ -259,13 +259,13 @@ namespace Testing_Poc_Healthcare.Services
                     _dBContext.InsuranceInfos.Update(insuranceInfo);
                     var result = _dBContext.SaveChanges() > 0;
                     if (result)
-                        return new ResponseStatus
+                        return new BenefitResponse
                         {
                             Status = "Success",
                             Message = "Benfit plan updated successfully"
                         };
                     else
-                        return new ResponseStatus
+                        return new BenefitResponse
                         {
                             Status = "Error",
                             Message = "Error occured while updating the benfit plan"
@@ -275,12 +275,13 @@ namespace Testing_Poc_Healthcare.Services
             }
             catch (Exception ex)
             {
-                return new ResponseStatus
+                return new BenefitResponse
                 {
                     Status = "Error",
                     Message = ex.Message
                 };
             }
         }
+
     }
 }
