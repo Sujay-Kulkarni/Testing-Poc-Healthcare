@@ -283,5 +283,32 @@ namespace Testing_Poc_Healthcare.Services
             }
         }
 
+        public ResponseStatus TerminateAssignedBenefitPlan(int assignedPlanId)
+        {
+            try
+            {
+                if(assignedPlanId > 0)
+                {
+                    var benefitPlan = _dBContext.PatientInsurances.Where(p => p.PatientInsuranceId == assignedPlanId).FirstOrDefault();
+                    if(benefitPlan != null)
+                    {
+                        benefitPlan.IsActive = Status.Terminited;
+                        _dBContext.PatientInsurances.Update(benefitPlan);
+                        var status = _dBContext.SaveChanges() > 0;
+                        
+                        if(status) { return new ResponseStatus { Status = "Success", Message = "Benefit plan terminated successfully" };
+                        } else { return new ResponseStatus { Status = "Error", Message = "Error occured while update to database" }; }
+                    } else { return new ResponseStatus { Status = "Error", Message = "Patient benefit plan id dosenot exist" }; }
+                } 
+                else
+                {
+                    return new ResponseStatus { Status = "Error", Message = "Invalid id" };
+                }
+
+            }catch(Exception ex)
+            {
+                return new ResponseStatus { Status = "Error", Message = ex.Message };
+            }
+        }
     }
 }

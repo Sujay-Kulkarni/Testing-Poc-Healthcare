@@ -10,7 +10,7 @@ namespace Testing_Poc_Healthcare.Interface
     {
         PatientResponse CreatePatient(PatientDetail patientDetail);
         PatientResponse CreatePatientAddress(int patientId, PatientAddress address);
-        void EditPatient();
+        UpdatePatientResponse EditPatient(int membreId, PatientDetail patientDetail);
         void DeletePatient();
         List<PersonalDetails> FindPatient(PatientSearch patientSearch);
         //bool AddBenefit(BenefitMaster benefit);

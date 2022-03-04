@@ -101,5 +101,18 @@ namespace Testing_Poc_Healthcare.Controllers
 
         }
 
+        [HttpPut("UpdateMemberDetails/{memberId}")]
+        public ActionResult UpdatePatientDetails(int memberId, PatientDetail memberDetail)
+        {
+            var response = _patientService.EditPatient(memberId, memberDetail);
+            if(response.Status == "Success")
+            {
+                return Ok(response);
+            } else
+            {
+                return BadRequest(response);
+            }
+        }
+
     }
 }

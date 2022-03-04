@@ -102,7 +102,12 @@ namespace Testing_Poc_Healthcare.Controllers
         [HttpDelete("RemoveAssignedBenfitPlanById/{assignedPlanId}")]
         public ActionResult TerminateBenefitPlan(int assignedPlanId)
         {
-            throw new NotImplementedException();
+            var response = _insuranceService.TerminateAssignedBenefitPlan(assignedPlanId);
+            if(response.Status == "Success")
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
         }
     }
 }

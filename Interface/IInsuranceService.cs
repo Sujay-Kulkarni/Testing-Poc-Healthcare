@@ -12,5 +12,6 @@ namespace Testing_Poc_Healthcare.Interface
         BenfitPlanList GetAllPlans();
         AssignedBenfitPlanList GetAllBenfitPlanByPatientId(int patitentId);
         ResponseStatus RemoveBenfitPlan(int insuranceInfoId);
+        ResponseStatus TerminateAssignedBenefitPlan(int assignedPlanId);
     }
 }

@@ -61,7 +61,6 @@ namespace Testing_Poc_Healthcare.Services
                 return new PatientResponse { Status = "Error", Message = ex.Message };
             }
         }
-
         public PatientResponse CreatePatientAddress(int patientId, PatientAddress address)
         {
             logger.Info("CreatePatientAddress method called" + patientId);
@@ -91,53 +90,94 @@ namespace Testing_Poc_Healthcare.Services
                 return new PatientResponse { Status = "Error", Message = ex.Message };
             }
         }
-
         public void DeletePatient()
         {
             throw new NotImplementedException();
         }
-        public void EditPatient()
+        public UpdatePatientResponse EditPatient(int memberId, PatientDetail patientDetail)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if((memberId != patientDetail.Personal.PatientID) || 
+                    (memberId <= 0 && patientDetail.Personal.PatientID <=0))
+                {
+                    return new UpdatePatientResponse { Status = "Error", Message = "Invalid member Id" };
+                } else
+                {
+                    var isValidMember = _dBContext.PatientInfos.Where(p => p.PatientID == memberId).FirstOrDefault();
+
+                    if(isValidMember != null)
+                    {
+                        _dBContext.ChangeTracker.Clear();
+                        var mappedObj = _mapper.Map<PatientInfo>(patientDetail.Personal);
+
+                        mappedObj.ModifiedDate = DateTime.Now;
+                        mappedObj.ModifiedBy = "Admin"; //Update logged in user name 
+                        _dBContext.PatientInfos.Update(mappedObj);
+                        var status = _dBContext.SaveChanges() > 0;
+                        
+                        if(status)
+                        {
+                            
+                            var mappedAddress = _mapper.Map<PatientAddress>(patientDetail.Address);
+                            mappedAddress.PatientId = mappedObj.PatientID;
+                            _dBContext.PatientAddresses.Update(mappedAddress);
+                            var isAddresUpdated = _dBContext.SaveChanges() > 0;
+                        
+                            if(isAddresUpdated) { return new UpdatePatientResponse { Status = "Success", Message = "Member details updated successfully", Data= patientDetail }; }
+                            else { return new UpdatePatientResponse { Status = "Error", Message = "Error occured while updateing member address" }; }
+                        }else { return new UpdatePatientResponse { Status = "Error", Message = "Error occured while updateing member details" }; }
+                    } else { return new UpdatePatientResponse { Status = "Error", Message = "Member dose not exist" }; }
+                }
+            }catch(Exception ex)
+            {
+                return new UpdatePatientResponse { Status = "Error", Message = ex.Message };
+            }
         }
         public List<PersonalDetails> FindPatient(PatientSearch patientSearch)
         {
-
             logger.Info("FindPatient method called");
             logger.Info(JsonConvert.SerializeObject(patientSearch));
 
             try
             {
+                List<PatientInfo> patientInfos = new List<PatientInfo>();
+
                 if (patientSearch.PatientId > 0)
                 {
-                    var patientInfos = _dBContext.PatientInfos.Where(p => p.PatientID == patientSearch.PatientId).ToList();
+                    patientInfos = _dBContext.PatientInfos.Where(p => p.PatientID == patientSearch.PatientId).ToList();
                     logger.Info(JsonConvert.SerializeObject(patientInfos));
-                    return _mapper.Map<List<PersonalDetails>>(patientInfos);
                 }
                 else if (!string.IsNullOrEmpty(patientSearch.FirstName))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList()));
-                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList());
+                    patientInfos = _dBContext.PatientInfos.Where(p => p.FirstName.Contains(patientSearch.FirstName)).ToList();
                 }
                 else if (!string.IsNullOrEmpty(patientSearch.MiddleName))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList()));
-                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList());
+                    patientInfos = _dBContext.PatientInfos.Where(p => p.MiddleName.Contains(patientSearch.MiddleName)).ToList();
                 }
                 else if (!string.IsNullOrEmpty(patientSearch.Lastname))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList()));
-                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList());
+                    patientInfos =  _dBContext.PatientInfos.Where(p => p.LastName.Contains(patientSearch.Lastname)).ToList();
                 }
                 else if (!string.IsNullOrEmpty(patientSearch.ContactNo))
                 {
                     logger.Info(_mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList()));
-                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList());
+                    patientInfos =  _dBContext.PatientInfos.Where(p => p.ContactNo == patientSearch.ContactNo).ToList();
                 } else if(patientSearch.DateOfBirth.HasValue)
                 {
-                    return _mapper.Map<List<PersonalDetails>>(_dBContext.PatientInfos.Where(p => p.DateOfBirth.Date == patientSearch.DateOfBirth.Value));
+                    patientInfos = _dBContext.PatientInfos.Where(p => p.DateOfBirth.Date == patientSearch.DateOfBirth.Value).ToList();
                 }
 
+                if(patientInfos.Count() > 0)
+                {
+                    patientInfos = patientInfos.Skip(0).Take(50).ToList();
+                    return _mapper.Map<List<PersonalDetails>>(patientInfos);
+                }
+                
                 logger.Info("No records records");
                 return null;
             }
@@ -148,22 +188,6 @@ namespace Testing_Poc_Healthcare.Services
             }
 
         }
-        //public bool AddBenefit(BenefitMaster benefit)
-        //{
-        //    logger.Info("AddBenefit method called" + benefit);
-        //    logger.Info(JsonConvert.SerializeObject(benefit));
-
-        //    try
-        //    {
-        //        _dBContext.Benefitmaster.Add(benefit);
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.Error(ex.ToString());
-        //        return false;
-        //    }
-        //}
         public MemberSummary PatientSummary(int patientId)
         {
             logger.Info("PatientSummary method called" + patientId);
